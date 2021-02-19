@@ -9,7 +9,9 @@ import Control from './Control';
 */
 
 const MS2PDisplay = state => {
-
+   return {
+		variaveis: state.variaveis.filter(variavel => state.display.includes(variavel.key)),
+   };
 }
 
 const MD2PDisplay = {
@@ -17,14 +19,19 @@ const MD2PDisplay = {
 }
 
 const MS2PControl = state => {
+   return {
 
+   };
 }
 
 const MD2PControl = {
 
 }
 
+const DisplayArea = connect(MS2PDisplay, MD2PDisplay)(Display);
+const ControlArea = connect(MS2PControl, MD2PControl)(Control);
+
 export {
-	DisplayArea: connect(MS2PDisplay, MD2PDisplay)(Display),
-	ControlArea: connect(MS2PControl, MD2PControl)(Control),
+	DisplayArea,
+	ControlArea,
 }

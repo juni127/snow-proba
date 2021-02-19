@@ -31,8 +31,35 @@ const initialState = {
 	],
 };
 
+const variaveisReducer = (state, action) => {
+	let switcher = {
+		[ACTIONS.ADD_VARIAVEL]: () => [
+			...state,
+			action.payload
+		],
+		[ACTIONS.DEL_VARIAVEL]: () => state.filter(item => item.key != action.payload.key), 
+		'default': () => state,
+	};
+	return (switcher[action.type] || switcher['default'])();
+}
+
+const displayReducer = (state, action) => {
+	let switcher = {
+		[ACTIONS.DEL_VARIAVEL]: () => state.filter(item => item != action.payload.key),
+		[ACTIONS.ADD_COMP]: () => [
+			...state,
+			action.payload
+		],
+		'default': () => state,
+	};
+	return (switcher[action.type] || switcher['default'])();
+}
+
 const rootReducer = (state = initialState, action) => {
-	return state;
+	return {
+		variaveis: variaveisReducer(state.variaveis, action),
+		display: displayReducer(state.display, action)
+	};
 }
 
 export default rootReducer;
