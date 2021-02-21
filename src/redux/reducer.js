@@ -50,6 +50,7 @@ const displayReducer = (state, action) => {
 			...state,
 			action.payload
 		],
+		[ACTIONS.DEL_COMP]: () => state.filter(key => key != action.payload),
 		'default': () => state,
 	};
 	return (switcher[action.type] || switcher['default'])();

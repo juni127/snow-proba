@@ -53,7 +53,7 @@ function TabPanel(props: TabPanelProps) {
 
 const useStyles = makeStyles((theme) => ({
     root: {
-		position: 'absolute',
+		position: 'fixed',
 		right: 0,
 		top: 0,
 		maxWidth: 720,
@@ -71,10 +71,9 @@ const useStyles = makeStyles((theme) => ({
 		borderLeft: '1px solid grey',
     },
 	tbPanel: {
-		flexGrow: 1,
 		width: '100%',
-		minHeight: 0,
-		flexDirection: 'column',
+        height: 'calc(100% - 112px)',
+        overflow: 'scroll',
 	}
   }));
 

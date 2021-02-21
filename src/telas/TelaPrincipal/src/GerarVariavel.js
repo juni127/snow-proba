@@ -18,12 +18,8 @@ import ListaAmostra from './ListaAmostra';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-      flexGrow: 1,
-      width: '100%',
-      overflow: 'auto',
     },
     children: {
-      width: '100%',
     }
 }));
 
@@ -88,6 +84,7 @@ const GerarVariavel = props => {
     return (
         <Grid
             item
+            xs={12}
             container
             direction="column"
             justify="flex-start"
@@ -95,6 +92,7 @@ const GerarVariavel = props => {
                 
             <Grid
                 item
+                xs={12}
                 container
                 direction="row"
                 className={classes.children}>
@@ -118,6 +116,7 @@ const GerarVariavel = props => {
 
             <Grid
                 item
+                xs={12}
                 container
                 direction="row"
                 className={classes.children}>

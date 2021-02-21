@@ -4,6 +4,7 @@ export const ACTIONS = {
 	ADD_VARIAVEL: 'ADD_VARIAVEL',
 	DEL_VARIAVEL: 'DEL_VARIAVEL',
 	ADD_COMP: 'ADD_COMP',
+	DEL_COMP: 'DEL_COMP'
 }
 
 export const addVariavel = variavel => {
@@ -26,6 +27,13 @@ export const delVariavel = payload => {
 export const addComparacao = payload => {
 	return {
 		type: ACTIONS.ADD_COMP,
+		payload
+	};
+}
+
+export const delComparacao = payload => {
+	return {
+		type: ACTIONS.DEL_COMP,
 		payload
 	};
 }

@@ -17,7 +17,7 @@ import {
 
 import {
     Delete,
-    Favorite,
+    AddCircleOutline,
     ExpandMore
 } from '@material-ui/icons';
 
@@ -70,7 +70,7 @@ const VariavelItem = props => {
         <IconButton 
             aria-label="add to favorites"
             onClick={() => props.addComparacao(props.variavel.key)}>
-          <Favorite />
+          <AddCircleOutline />
         </IconButton>
         <IconButton
           className={clsx(classes.expand, {

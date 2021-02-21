@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
 	  flex: 1,
 	  flexDirection: 'row',
       width: '50%',
+	  paddingRight: 60,
     },
 }));
 
@@ -23,7 +24,9 @@ const Display = props => {
 	return(
 		<Grid
 			item
-			container 
+			container
+			direction='row'
+			justify='center'
 			className={classes.root}>
 			{props.variaveis.map(variavel =>
 				<VariavelCard variavel={variavel} />	
