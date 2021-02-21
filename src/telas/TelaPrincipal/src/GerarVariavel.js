@@ -20,6 +20,11 @@ const useStyles = makeStyles((theme) => ({
     root: {
     },
     children: {
+    },
+    salvar: {
+        position: 'absolute',
+        bottom: 32,
+        right: 32,
     }
 }));
 
@@ -27,8 +32,8 @@ const GerarVariavel = props => {
 
     const classes = useStyles();
 
-    const [alpha, setAlpha] = useState(1);
     const [quantidade, setQuantidade] = useState(1);
+    const [seedNormal, setSeedNormal] = useState(100);
 
     const [variavel, setVariavel] = useState({
 		id: '', 
@@ -38,6 +43,7 @@ const GerarVariavel = props => {
 			tamanho: 5,
 			media: 0.5,
 			desvio: 0,
+            alpha: 1,
 		}
     });
 
@@ -46,8 +52,7 @@ const GerarVariavel = props => {
     const setType = type => setVariavel({...variavel, type});
 
     const setTamanho = tamanho => setVariavel({...variavel, data: {...variavel.data, tamanho}});
-    const setMedia = media => setVariavel({...variavel, data: {...variavel.data, media}});
-    const setDesvio = desvio => setVariavel({...variavel, data: {...variavel.data, desvio}});
+    const setAlpha = alpha => setVariavel({...variavel, data: {...variavel.data, alpha}})
 
     // Distribuição quase uniforme entre [0, 1)
     const randomNumber = () => {
@@ -57,14 +62,27 @@ const GerarVariavel = props => {
         return mantissa * Math.pow(2, -52);
     }
 
-    const toExponencial = x => (-1/alpha) * Math.log(1 - x);
+    const normal = () => {
+        let tmp = new Array(parseInt(seedNormal)).fill(0);
+        tmp = tmp.map(v => randomNumber());
+        return tmp.reduce((a, c) => a+c, 0)/tmp.length;
+    }
+
+    const toExponencial = x => (-1/variavel.data.alpha) * Math.log(1 - x);
 
     const gerarVariavel = () => {
         let amostras = 
             new Array(parseInt(quantidade)).fill(
                 new Array(parseInt(variavel.data.tamanho)).fill(0)
             );
-        amostras = amostras.map(amostra => amostra.map(i => variavel.type=='exponencial'?toExponencial(randomNumber()):randomNumber()));
+
+        const switcher = {
+            'uniforme': () => randomNumber(),
+            'exponencial': () => toExponencial(randomNumber()),
+            'normal': () => normal(),
+        };
+
+        amostras = amostras.map(amostra => amostra.map(i => switcher[variavel.type]()));
         
         let somaMedia = amostras.reduce(
             (acc, cur) => acc + (cur.reduce((a, c) => a+c, 0.0)/cur.length), 0.0
@@ -110,6 +128,7 @@ const GerarVariavel = props => {
 
                 <MenuItem value='uniforme'>Uniforme</MenuItem>
                 <MenuItem value='exponencial'>Exponencial</MenuItem>
+                <MenuItem value='normal'>Normal</MenuItem>
                 
                 </Select>
             </Grid>
@@ -132,9 +151,15 @@ const GerarVariavel = props => {
             </Grid>
 
             { variavel.type == 'exponencial' && <TextField 
-                value={alpha}
+                value={variavel.data.alpha}
                 onChange={e => setAlpha(e.target.value)}
                 label="Alfa"/>
+            }
+
+            { variavel.type == 'normal' && <TextField 
+                value={seedNormal}
+                onChange={e => setSeedNormal(e.target.value)}
+                label="Tamanho da Amostra"/>
             }
 
             <Button 
@@ -150,7 +175,8 @@ const GerarVariavel = props => {
 
             <Button 
                 variant="contained"
-                onClick={ () => props.salvarVariavel(variavel) }>
+                onClick={ () => props.salvarVariavel(variavel) }
+                className={classes.salvar}>
                 Salvar
             </Button>
         </Grid>

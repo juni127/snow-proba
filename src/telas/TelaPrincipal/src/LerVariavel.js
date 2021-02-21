@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { addVariavel } from '../../../redux/actions';
 
 import ReactFileReader from 'react-file-reader';
+import XLSX from 'xlsx';
 
 import {
     Container,
@@ -14,7 +15,21 @@ import {
     MenuItem,
 } from '@material-ui/core';
 
+import { makeStyles } from '@material-ui/core/styles';
+
 import ListaAmostra from './ListaAmostra';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+    },
+    children: {
+    },
+    salvar: {
+        position: 'absolute',
+        bottom: 32,
+        right: 32,
+    }
+}));
 
 const LerVariavel = props => {
 
@@ -36,13 +51,46 @@ const LerVariavel = props => {
 
     const setType = type => setVariavel({...variavel, type});
 
-    const setTamanho = tamanho => setVariavel({...variavel, data: {...variavel.data, tamanho}});
-    const setMedia = media => setVariavel({...variavel, data: {...variavel.data, media}});
-    const setDesvio = desvio => setVariavel({...variavel, data: {...variavel.data, desvio}}); 
-
     const handleFiles = f => {
-        console.log(f);
+        let res = {};
+        let file = f[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, {type: 'array'});
+          Object.entries(Object.values(workbook.Sheets)[0])
+            .forEach(v => {
+                if (typeof res[v[0].replace(/[0-9]/g, '')] === 'undefined')res[v[0].replace(/[0-9]/g, '')] = [];
+                res[v[0].replace(/[0-9]/g, '')] = [...res[v[0].replace(/[0-9]/g, '')], v[1].v];
+            });
+          delete res['!margins'];
+          delete res['!ref'];
+          let amostras = [];
+          Object.entries(res).forEach(v => {
+              amostras.push(v[1])
+          });
+          let tamanho = amostras[0].length;
+          let media = amostras.reduce(
+            (acc, cur) => acc + (cur.reduce((a, c) => a+c, 0.0)/cur.length), 0.0
+          )/amostras.length;
+          let somaDesvio = amostras.reduce(
+            (acc, cur) => acc + (cur.reduce((a, c) => a + Math.pow(c - media, 2), 0.0)), 0.0
+          );
+          let desvio = Math.sqrt(somaDesvio/(amostras.length*tamanho));
+          setVariavel({
+              ...variavel,
+              data:{
+                  amostras,
+                  tamanho,
+                  media,
+                  desvio,
+              }
+          });
+        };
+        reader.readAsArrayBuffer(file);
     }
+
+    const classes = useStyles();
 
     return (
         <Container>
@@ -61,6 +109,7 @@ const LerVariavel = props => {
 
               <MenuItem value='uniforme'>Uniforme</MenuItem>
               <MenuItem value='exponencial'>Exponencial</MenuItem>
+              <MenuItem value='normal'>Normal</MenuItem>
             
             </Select>
 
@@ -78,7 +127,8 @@ const LerVariavel = props => {
                 desvio={variavel.data.desvio} />
             <Button 
                 variant="contained"
-                onClick={ () => props.salvarVariavel(variavel) }>
+                onClick={ () => props.salvarVariavel(variavel) }
+                className={classes.salvar}>
                 Salvar
             </Button>
         </Container>

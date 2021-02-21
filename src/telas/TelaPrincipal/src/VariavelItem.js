@@ -7,6 +7,7 @@ import clsx from 'clsx';
 
 import {
     Card,
+    Grid,
     CardHeader,
     IconButton,
     CardActions,
@@ -25,7 +26,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-      maxWidth: 345,
+      maxWidth: '100%',
       margin: 8,
     },
     media: {
@@ -64,7 +65,7 @@ const VariavelItem = props => {
           </IconButton>
         }
         title={props.variavel.id}
-        subheader={props.variavel.type}
+        subheader={'Distribuição: ' + props.variavel.type}
       />
       <CardActions disableSpacing>
         <IconButton 
@@ -86,12 +87,26 @@ const VariavelItem = props => {
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           {props.variavel.data.amostras.map((amostra, index) => 
-          <div>
-          <Typography paragraph>Amostra {index+1}:</Typography>
-          {amostra.map((item, i) => 
-            <Typography>{i+1}: {item}</Typography>
-          )}
-          </div>
+          <Grid
+            item
+            container
+            xs={12}
+            direction="column">
+          <Typography variant='h5' paragraph>Amostra {index+1}:</Typography>
+            <Grid
+              item
+              container
+              direction='row'>
+            {amostra.map((item, i) => 
+              <Grid
+                item
+                container
+                xs={6}>
+                <Typography>{i+1}: {item}</Typography>
+              </Grid>
+            )}
+            </Grid>
+          </Grid>
           )}
         </CardContent>
       </Collapse>

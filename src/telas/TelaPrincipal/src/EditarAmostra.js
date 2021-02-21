@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import {
-    Container,
+    Grid,
     TextField,
     Typography,
     Button,
@@ -11,6 +11,19 @@ import {
 import {
     Delete
 } from '@material-ui/icons';
+
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+    },
+    amostra: {
+        paddingLeft: 32,
+    },
+    margin: {
+        margin: 8,
+    }
+  }));
 
 const EditarAmostra = props => {
 
@@ -67,24 +80,78 @@ const EditarAmostra = props => {
         return "Modelo correto";
     }
 
-
+    const classes = useStyles();
 
     return (
-        <Container>
-            <Typography>Media: {props.data.media}</Typography>
-            <Typography>Desvio Padrão: {props.data.desvio}</Typography>
-            <Typography>Qui-Quadrado: {modeloCerto()}, P(x) = {quiQuadrado}</Typography>
-            <Typography>Amostras: </Typography>
+        <Grid
+            item
+            container
+            xs={12}
+            direction="column">
+            <Typography variant="h6"><b>Media:</b> {props.data.media}</Typography>
+            <Typography variant="h6"><b>Desvio Padrão:</b> {props.data.desvio}</Typography>
+            
+            <Grid
+                item
+                container
+                xs={12}
+                direction="row"
+                justify="space-between">
+                <Typography variant="h4" >Amostras: </Typography>
+                <Button 
+                    variant="contained"
+                    onClick={ () => setAmostras([...props.data.amostras, []]) }
+                    className={classes.margin}>
+                    Nova Amostra
+                </Button>
+            </Grid>
             {props.data.amostras.map((amostra, index) => 
-                <Container>
-                    <IconButton 
-                        aria-label="delete"
-                        onClick={ () => delAmostra(index) }>
-                        <Delete />
-                    </IconButton>
-                    <Typography>Amostra {index+1}:</Typography>
+                <Grid
+                    item
+                    container
+                    xs={12}
+                    direction="column">
+                    <Grid 
+                        item
+                        container
+                        xs={12}
+                        direction="row"
+                        justify="space-between"
+                        alignItems="center">
+                        <Grid
+                            item
+                            container
+                            xs={8}
+                            direction='row'
+                            alignItems='center'>
+                            <IconButton 
+                                aria-label="delete"
+                                onClick={ () => delAmostra(index) }>
+                                <Delete />
+                            </IconButton>
+                            <Typography variant="h5">Amostra {index+1}:</Typography>
+                        </Grid>
+                        
+
+                        <Button 
+                            variant="contained"
+                            onClick={ () => addItem(index) }
+                            className={classes.margin}>
+                            Nova Entrada
+                        </Button>
+                    </Grid>
+                    <Grid
+                        item
+                        container
+                        xs={12}
+                        direction="row">
                     {amostra.map((v, i) =>
-                        <Container>
+                        <Grid
+                            item
+                            container
+                            direction="row"
+                            xs={6}
+                            className={classes.amostra}>
                             <IconButton 
                                 aria-label="delete"
                                 onClick={ () => delItem(index, i) }>
@@ -93,21 +160,12 @@ const EditarAmostra = props => {
                             <TextField
                                 value={v}
                                 onChange={e => changeItem(e.target.value, index, i) }/>
-                        </Container>
+                        </Grid>
                     )}
-                    <Button 
-                        variant="contained"
-                        onClick={ () => addItem(index) }>
-                        Nova Entrada
-                    </Button>
-                </Container>
+                    </Grid>
+                </Grid>
             )}
-            <Button 
-                variant="contained"
-                onClick={ () => setAmostras([...props.data.amostras, []]) }>
-                Nova Amostra
-            </Button>
-        </Container>
+        </Grid>
     );
 }
 

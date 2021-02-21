@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
 		borderLeft: '1px solid grey',
     },
     rootCollapsed: {
-		position: 'absolute',
+		position: 'fixed',
 		right: -660,
 		top: 0,
 		maxWidth: 720,

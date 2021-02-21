@@ -9,18 +9,20 @@ import {
 	Card,
 	CardHeader,
 	IconButton,
-	CardActions,
-	Collapse,
 	CardContent,
-    Typography
+	Table,
+	TableBody,
+	TableCell,
+	TableRow,
+	TableContainer,
+	TableHead,
+	Grid,
 } from '@material-ui/core';
 
 import { Chart } from 'react-google-charts';
 
 import {
     Cancel,
-    Favorite,
-    ExpandMore
 } from '@material-ui/icons';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -53,51 +55,17 @@ const VariavelCard = props => {
 	const capitalizeFirstLetter = string => string.charAt(0).toUpperCase() + string.slice(1);
 	const subtitle = () => "Distribuição: " + capitalizeFirstLetter(props.variavel.type);
 
-	const switcher = amostra => {
-		let r = 1;
-		if(amostra < 0.1)return r;
-		r = r + 1;
-		if(amostra < 0.2)return r;
-		r = r + 1;
-		if(amostra < 0.3)return r;
-		r = r + 1;
-		if(amostra < 0.4)return r;
-		r = r + 1;
-		if(amostra < 0.5)return r;
-		r = r + 1;
-		if(amostra < 0.6)return r;
-		r = r + 1;
-		if(amostra < 0.7)return r;
-		r = r + 1;
-		if(amostra < 0.8)return r;
-		r = r + 1;
-		if(amostra < 0.9)return r;
-		r = r + 1;
-		return r;
-	}
+	const media = amostra => amostra.reduce((a, b) => a+b, 0)/amostra.length;
+	const mediana = amostra =>
+		amostra.length%2?
+		amostra.sort((a, b) => a<b?-1:a>b?1:0)[(amostra.length-1)/2]:
+		(amostra.sort((a, b) => a<b?-1:a>b?1:0)[amostra.length/2]+amostra.sort((a, b) => a<b?-1:a>b?1:0)[(amostra.length/2)-1])/2;
+	const limiteSuperior = amostra => amostra.reduce((a, b) => Math.max(a, b), 0);
+	const limiteInferior = amostra => amostra.reduce((a, b) => Math.min(a, b), 1);
+	const primeiroQuartil = amostra => amostra.sort((a, b) =>  a<b?-1:a>b?1:0)[Math.round(0.25*amostra.length)];
+	const terceiroQuartil = amostra => amostra.sort((a, b) =>  a<b?-1:a>b?1:0)[Math.round(0.75*amostra.length)];
 
-	const histo = amostras => {
-		let a = [
-			['Intervalo', 'Resultados'],
-			['[0 - 0.1)', 0],
-			['[0.1 - 0.2)', 0],
-			['[0.2 - 0.3)', 0],
-			['[0.3 - 0.4)', 0],
-			['[0.4 - 0.5)', 0],
-			['[0.5 - 0.6)', 0],
-			['[0.6 - 0.7)', 0],
-			['[0.7 - 0.8)', 0],
-			['[0.8 - 0.9)', 0],
-			['[0.9 - 1]', 0],
-		];
-		amostras.forEach(
-			amostra => amostra.forEach(
-				elemento => a[switcher(elemento)][1] = a[switcher(elemento)][1] + 1
-			)
-		);
-		console.log(a);
-		return a;
-	}
+	const toExponencial = x => (-1/props.variavel.data.alpha) * Math.log(1 - x);
 
 	return(
 		<Card className={classes.root}>
@@ -145,6 +113,104 @@ const VariavelCard = props => {
     				legend: { position: 'none' },
   				}}
   				rootProps={{ 'data-testid': '1' }}/>
+			<Chart
+				width={'500px'}
+				height={'300px'}
+				chartType="LineChart"
+				loader={<div>Loading Chart</div>}
+				data={[
+					[
+					{ type: 'number', label: 'x' },
+					{ type: 'number', label: 'values' },
+					{ id: 'i1', type: 'number', role: 'interval' },
+					{ id: 'i0', type: 'number', role: 'interval' },
+					{ id: 'i1', type: 'number', role: 'interval' },
+					{ id: 'i0', type: 'number', role: 'interval' },
+					{ id: 'i1', type: 'number', role: 'interval' },
+					],
+					...props.variavel.data.amostras.map((v, i) => 
+						[i+1, media(v), limiteInferior(v), primeiroQuartil(v), mediana(v), terceiroQuartil(v), limiteSuperior(v)]
+					)
+				]}
+				options={{
+					title: 'Box Plot',
+					curveType: 'function',
+					intervals: { color: 'series-color' },
+					interval: {
+						i0: {
+							color: '#4374E0',
+							barWidth: 1,
+							boxWidth: 1,
+							lineWidth: 2,
+							style: 'boxes'
+						},
+						i1: {
+							color: '#E49307',
+							style: 'bars',
+							fillOpacity: 1,
+							color: '#777'
+						},
+					},
+					legend: 'none',
+				}}
+				rootProps={{ 'data-testid': '8' }}
+				/>
+			<Chart
+				width={'500px'}
+				height={'300px'}
+				chartType="ScatterChart"
+				loader={<div>Loading Chart</div>}
+				data={[
+					['Amostrais', 'Esperado'],
+					...props.variavel.data.amostras
+						.reduce((a, b) => a.concat(b), [])
+						.sort((a, b) => a<b?-1:a>b?1:0)
+						.map((v, i, a) => [
+							v, 
+							props.variavel.type=="exponencial"?toExponencial(i/a.length):i/a.length
+						]),
+				]}
+				options={{
+					title: 'Normal Probability Plot',
+					hAxis: { title: 'Amostra', minValue: 0, maxValue: 1 },
+					vAxis: { title: 'Esperado', minValue: 0, maxValue: 1 },
+					legend: 'none',
+					trendlines: {
+					  0: {},
+					}
+				}}
+				rootProps={{ 'data-testid': '1' }}
+				/>
+			<TableContainer component={Grid}>
+			<Table className={classes.table} aria-label="simple table">
+				<TableHead>
+				<TableRow>
+					<TableCell>{props.variavel.id}</TableCell>
+					<TableCell align="right">Media</TableCell>
+					<TableCell align="right">Mediana</TableCell>
+					<TableCell align="right">Limite Inferior</TableCell>
+					<TableCell align="right">Primeiro Quartil</TableCell>
+					<TableCell align="right">Terceiro Quartil</TableCell>
+					<TableCell align="right">Limite Superior</TableCell>
+				</TableRow>
+				</TableHead>
+				<TableBody>
+				{props.variavel.data.amostras.map((amostra, index) => (
+					<TableRow key={index}>
+					<TableCell component="th" scope="row">
+						Amostra: {index+1}
+					</TableCell>
+					<TableCell align="right">{media(amostra)}</TableCell>
+					<TableCell align="right">{mediana(amostra)}</TableCell>
+					<TableCell align="right">{limiteInferior(amostra)}</TableCell>
+					<TableCell align="right">{primeiroQuartil(amostra)}</TableCell>
+					<TableCell align="right">{terceiroQuartil(amostra)}</TableCell>
+					<TableCell align="right">{limiteSuperior(amostra)}</TableCell>
+					</TableRow>
+				))}
+				</TableBody>
+			</Table>
+			</TableContainer>
 		  </CardContent>
 		</Card>
 	);
